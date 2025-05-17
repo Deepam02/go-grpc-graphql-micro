@@ -24,6 +24,7 @@ func main() {
 
 	s, err := NewGraphQLServer(cfg.AccountUrl, cfg.CatalogUrl, cfg.OrderUrl)
 	if err != nil {
+		log.Println("hello")
 		log.Fatal(err)
 	}
 
