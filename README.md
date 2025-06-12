@@ -169,35 +169,6 @@ A modern microservices architecture built with Go, gRPC, and GraphQL, featuring 
 - `CATALOG_SERVICE_URL`: Catalog service URL
 - `ORDER_SERVICE_URL`: Order service URL
 
-## Development
-
-1. **Generate Protocol Buffers**
-   ```bash
-   protoc --go_out=. --go_opt=paths=source_relative \
-          --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-          */pb/*.proto
-   ```
-
-2. **Generate GraphQL Code**
-   ```bash
-   cd graphql
-   go run github.com/99designs/gqlgen generate
-   ```
-
-3. **Run Tests**
-   ```bash
-   go test ./...
-   ```
-
-## Docker Support
-
-The project includes Docker configurations for all services:
-
-- Each service has its own Dockerfile
-- Docker Compose orchestrates all services
-- Health checks are implemented for critical services
-- Database services are included in the Docker Compose configuration
-
 ## Project Structure
 
 ```
