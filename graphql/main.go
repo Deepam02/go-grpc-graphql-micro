@@ -22,14 +22,39 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Printf("Starting GraphQL server with config: Account=%s, Catalog=%s, Order=%s", 
+		cfg.AccountUrl, cfg.CatalogUrl, cfg.OrderUrl)
+
 	s, err := NewGraphQLServer(cfg.AccountUrl, cfg.CatalogUrl, cfg.OrderUrl)
 	if err != nil {
-		log.Println("hello")
+		log.Printf("Failed to create GraphQL server: %v", err)
 		log.Fatal(err)
 	}
 
-	http.Handle("/graphql", handler.New(s.ToExecutableSchema()))
-	http.Handle("/playground", playground.Handler("Deepam", "/graphql"))
+	// Use NewDefaultServer to support all transports (POST, GET, multipart, websocket, etc.)
+	h := handler.NewDefaultServer(s.ToExecutableSchema())
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// Add middleware for logging
+	http.Handle("/graphql", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Received request: %s %s", r.Method, r.URL.Path)
+		h.ServeHTTP(w, r)
+	}))
+
+	// Add playground
+	http.Handle("/playground", playground.Handler("GraphQL Playground", "/graphql"))
+
+	// Add health check endpoint
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	log.Printf("GraphQL server starting on :8080")
+	log.Printf("Playground available at /playground")
+	log.Printf("GraphQL endpoint available at /graphql")
+
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Printf("Server failed to start: %v", err)
+		log.Fatal(err)
+	}
 }
